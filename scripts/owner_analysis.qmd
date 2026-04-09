@@ -1,5 +1,54 @@
 ---
 title: "Owner Analysis"
+author: "Tracy Grimes"
 format: html
 ---
 
+## Exercise: Explore, Clean, and Wrangle Data
+
+## load packages
+
+```{r}
+library(readr)
+library(dplyr)
+library(ggplot2)
+library(tidyr)
+```
+
+## read data
+```{r}
+lobster_abundance <- readr::read_csv(here::here("data", "Lobster_Abundance_All_Years_20240411.csv")) %>%
+    janitor::clean_names()
+```
+
+## remove NAs
+```{r}
+lobster_abundance <- lobster_abundance %>% 
+    mutate(size_mm = na_if(size_mm, -99999))
+
+lobster_abundance <- lobster_abundance %>% 
+    mutate(size_mm = if_else(condition = (size_mm == -99999), true = NA, false = size_mm))
+```
+
+## subset out Naples Reef data
+
+```{r}
+not_napl <- lobster_abundance %>% 
+    filter(site != "NAPL")
+```
+
+## subset by site and size
+
+```{r}
+aque_70mm <- lobster_abundance %>% 
+    filter(site == "AQUE" & size_mm >= 70)
+```
+
+## summarize data
+
+```{r}
+max_lobster <- lobster_abundance %>% 
+  group_by(site, month) %>% 
+  summarize(max_length = max(size_mm, na.rm = TRUE),
+            .groups = 'drop')
+```
